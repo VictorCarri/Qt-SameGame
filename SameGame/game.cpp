@@ -411,6 +411,8 @@ void Game::initBoard()
 
                             case RIGHT: // Checking the right
                             {
+                                qDebug() << "Checking right" << endl << "errorCheck(" << c+1 << ", " << r << ") = " << errorCheck(c+1, r);
+
                                 /* Use errorCheck to determine if square exists and is black. errorCheck returns -2 in this case */
                                 if (errorCheck(c+1, r) == -2) // Square to right exists and is black
                                 {
@@ -443,6 +445,8 @@ void Game::initBoard()
 
                             case TOP: // Checking the top
                             {
+                                qDebug() << "Checking top" << endl << "errorCheck(" << c << ", " << r-1 << ") = " << errorCheck(c, r-1);
+
                                 /* Use errorCheck to determine if square exists and is black. errorCheck returns -2 in this case */
                                 if (errorCheck(c, r-1) == -2) // Square above exists and is black
                                 {
@@ -475,6 +479,8 @@ void Game::initBoard()
 
                             case BOTTOM: // Checking the bottom
                             {
+                                qDebug() << "Checking bottom" << endl << "errorCheck(" << c << ", " << r+1 << ") = " << errorCheck(c, r+1);
+
                                 /* Use errorCheck to determine if square exists and is black. errorCheck returns -2 in this case */
                                 if (errorCheck(c, r+1) == -2) // Square below exists and is black
                                 {
@@ -563,9 +569,9 @@ bool Game::noMovesLeft()
  */
 int Game::errorCheck(int m_x, int m_y)
 {
-    if ((1 <= m_x && m_x < m_maxCol)
+    if ((0 <= m_x && m_x < m_maxCol)
         &&
-        (1 <= m_y && m_y < m_maxRow)) // x and y are within bounds
+        (0 <= m_y && m_y < m_maxRow)) // x and y are within bounds
     {
         if (c_board->at(m_y).at(m_x) != BLACK) // Not trying to delete a background block
         {
