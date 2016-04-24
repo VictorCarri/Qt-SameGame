@@ -75,3 +75,15 @@ void SameGameWindow::on_actionNew_Game_triggered()
     c_model->clearChangedBlocks(); // Tell the model to clear its queue
     e_curStat = IGAM; // Change to "in game" state
 }
+
+/** About menu actions **/
+
+/**
+ * @brief SameGameWindow::on_actionGame_triggered Handles a click on About->Game, which displays a message on the game.
+ */
+void SameGameWindow::on_actionGame_triggered()
+{
+    QMessageBox msgBox; // Create the message box
+    msgBox.setText("Click on a block to delete all of the adjacent blocks of the same colour.\nThe more you delete at once, the more points you earn per block.\nTry to beat the high scores!"); // Set help text
+    msgBox.exec(); // Show the dialog
+}

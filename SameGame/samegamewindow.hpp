@@ -43,7 +43,11 @@ public:
 
     /* Controller methods */
 private slots:
-    void on_actionNew_Game_triggered(); // Handles a click on the "New Game" menu item.
+    /* File menu actions */
+    void on_actionNew_Game_triggered(); // Handles a click on the File->"New Game" menu item.
+
+    /* About menu actions */
+    void on_actionGame_triggered(); // Handles a click on the About->Game menu item.
 
 private:
     Ui::SameGameWindow *c_view;

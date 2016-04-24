@@ -539,11 +539,11 @@ void Game::initBoard()
  */
 int Game::randIntInRange(int lBound, int uBound)
 {
-    //qsrand(qrand()); // Seed RNG with initial value
-    //return qrand() % ((uBound + 1) - lBound) + lBound;
+    qsrand(qrand()); // Seed RNG with initial value
+    return qrand() % ((uBound + 1) - lBound) + lBound;
     //return qrand() % (uBound - lBound) + lBound + 1;
-    srand(rand());
-    return rand() % (uBound - lBound) + lBound + 1;
+    //srand(rand());
+    //return rand() % (uBound - lBound) + lBound + 1;
     // return rand() % ((uBound+1) - lBound) + 1;
 }
 
