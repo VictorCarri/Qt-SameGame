@@ -355,9 +355,10 @@ void Game::initBoard()
             if (c_board->at(r).at(c) == BLACK) // We don't want to change coloured squares
             {
                 qDebug() << "Cell (" << c << ", " << r << ") is black.";
-                randColInd = randIntInRange(0, c_colours->size()-1); // Choose a random colour index
+                randColInd = randIntInRange(1, c_colours->size()-1); // Choose a random colour index
                 qDebug() << "Chosen colour index = " << randColInd;
                 c_board->at(r)[c] = randColInd; // Set this cell's colour to the randomly-chosen one
+                c_cBlocks.enqueue(pair<int, int>(c, r)); // Add changed block to queue
                 qDebug() << "After assignment, colour index at (" << c << ", " << r << ") = " << c_board->at(r).at(c);
 
                 /* Choose a random direction with at least 1 black square */
@@ -401,6 +402,8 @@ void Game::initBoard()
                                     while (nToFill > 0) // Keep filling squares until we have filled all of the ones which we wanted to fill
                                     {
                                         c_board->at(c_curY)[c_curX] = randColInd; // Set the square to the randomly-chosen colour
+                                        c_cBlocks.enqueue(pair<int, int>(c_curX, c_curY)); // Add changed block to queue
+                                        qDebug() << "Set (" << c_curX << ", " << c_curY << ") to " << c_board->at(c_curY).at(c_curX);
                                         c_curX--; // Move left for next loop
                                         nToFill--; // Count this square to stop loop eventually
                                     }
@@ -435,6 +438,8 @@ void Game::initBoard()
                                     while (nToFill > 0) // Keep filling squares until we have filled all of the ones which we wanted to fill
                                     {
                                         c_board->at(c_curY)[c_curX] = randColInd; // Set the square to the randomly-chosen colour
+                                        c_cBlocks.enqueue(pair<int, int>(c_curX, c_curY)); // Add changed block to queue
+                                        qDebug() << "Set (" << c_curX << ", " << c_curY << ") to " << c_board->at(c_curY).at(c_curX);
                                         c_curX++; // Move right for next loop
                                         nToFill--; // Count this square to stop loop eventually
                                     }
@@ -469,6 +474,8 @@ void Game::initBoard()
                                     while (nToFill > 0) // Keep filling squares until we have filled all of the ones which we wanted to fill
                                     {
                                         c_board->at(c_curY)[c_curX] = randColInd; // Set the square to the randomly-chosen colour
+                                        c_cBlocks.enqueue(pair<int, int>(c_curX, c_curY)); // Add changed block to queue
+                                        qDebug() << "Set (" << c_curX << ", " << c_curY << ") to " << c_board->at(c_curY).at(c_curX);
                                         c_curY--; // Move up for next loop
                                         nToFill--; // Count this square to stop loop eventually
                                     }
@@ -503,6 +510,8 @@ void Game::initBoard()
                                     while (nToFill > 0) // Keep filling squares until we have filled all of the ones which we wanted to fill
                                     {
                                         c_board->at(c_curY)[c_curX] = randColInd; // Set the square to the randomly-chosen colour
+                                        c_cBlocks.enqueue(pair<int, int>(c_curX, c_curY)); // Add changed block to queue
+                                        qDebug() << "Set (" << c_curX << ", " << c_curY << ") to " << c_board->at(c_curY).at(c_curX);
                                         c_curY++; // Move down for next loop
                                         nToFill--; // Count this square to stop loop eventually
                                     }
@@ -530,8 +539,12 @@ void Game::initBoard()
  */
 int Game::randIntInRange(int lBound, int uBound)
 {
-    qsrand(qrand()); // Seed RNG with initial value
-    return qrand() % ((uBound + 1) - lBound) + lBound;
+    //qsrand(qrand()); // Seed RNG with initial value
+    //return qrand() % ((uBound + 1) - lBound) + lBound;
+    //return qrand() % (uBound - lBound) + lBound + 1;
+    srand(rand());
+    return rand() % (uBound - lBound) + lBound + 1;
+    // return rand() % ((uBound+1) - lBound) + 1;
 }
 
 /**

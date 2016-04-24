@@ -14,8 +14,8 @@ SameGameWindow::SameGameWindow(QWidget *parent) :
     QMainWindow(parent), // Construct parent
     c_view(new Ui::SameGameWindow), // Construct view
     e_curStat(WSTART), // Start in start state
-    m_uMaxRow(5), // Start with 5 rows
-    m_uMaxCol(5), // Start with 5 columns
+    m_uMaxRow(4), // Start with 10 rows
+    m_uMaxCol(4), // Start with 10 columns
     m_nColours(4) // Start with 4 colours
 {
     c_view->setupUi(this); // Setup UI
