@@ -636,25 +636,37 @@ int Game::removeBlocks(int m_x, int m_y, int m_col)
 
             /** TODO: Add error checks around colour checks, to ensure that the square exists **/
 
-            /* If there are any adjacent blocks of the same colour, remove them and check their neighbours as well */
-            if (c_board->at(m_y).at(m_x-1) == m_col) // Block of same colour to left
+            if (errorCheck(m_x-1, m_y) == 0) // Block must exist and not be black
             {
-              nDeleted += removeBlocks(m_x-1, m_y, m_col); // Recursively remove that block and its neighbours, and count the # of deletions
+                /* If there are any adjacent blocks of the same colour, remove them and check their neighbours as well */
+                if (c_board->at(m_y).at(m_x-1) == m_col) // Block of same colour to left
+                {
+                  nDeleted += removeBlocks(m_x-1, m_y, m_col); // Recursively remove that block and its neighbours, and count the # of deletions
+                }
             }
 
-            if (c_board->at(m_y).at(m_x+1) == m_col) // Same colour block to right
+            if (errorCheck(m_x+1, m_y) == 0) // Block must exist and not be black
             {
-                nDeleted += removeBlocks(m_x+1, m_y, m_col); // Delete it and any neighbours of the same colour, and count the # of blocks deleted by that call
+                if (c_board->at(m_y).at(m_x+1) == m_col) // Same colour block to right
+                {
+                    nDeleted += removeBlocks(m_x+1, m_y, m_col); // Delete it and any neighbours of the same colour, and count the # of blocks deleted by that call
+                }
             }
 
-            if (c_board->at(m_y-1).at(m_x) == m_col) // Same colour block above
+            if (errorCheck(m_x, m_y-1) == 0) // Block must exist and not be black
             {
-                nDeleted += removeBlocks(m_x, m_y-1, m_col); // Delete it and its neighbours, and include # of deletions in return value
+                if (c_board->at(m_y-1).at(m_x) == m_col) // Same colour block above
+                {
+                    nDeleted += removeBlocks(m_x, m_y-1, m_col); // Delete it and its neighbours, and include # of deletions in return value
+                }
             }
 
-            if (c_board->at(m_y+1).at(m_x) == m_col) // Same colour block below
+            if (errorCheck(m_x, m_y+1) == 0) // Block must exist and not be black
             {
-                nDeleted += removeBlocks(m_x, m_y+1, m_col); // Delete block and its neighbours, and include count in total
+                if (c_board->at(m_y+1).at(m_x) == m_col) // Same colour block below
+                {
+                    nDeleted += removeBlocks(m_x, m_y+1, m_col); // Delete block and its neighbours, and include count in total
+                }
             }
         }
     }

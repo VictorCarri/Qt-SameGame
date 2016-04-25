@@ -135,6 +135,7 @@ bool SameGameWindow::eventFilter(QObject *object, QEvent *event)
             if (!c_model->isCellEmpty(get<0>(modelCoords), get<1>(modelCoords))) // This cell isn't empty, so we can delete blocks
             {
                 c_model->removeBlock(get<0>(modelCoords), get<1>(modelCoords)); // Tell model to remove a block at this position
+                updateView(); // Update the view to display the changed board
 
                 /* Check if the game is over */
                 if (c_model->isGameOver()) // The game has ended, for some reason
