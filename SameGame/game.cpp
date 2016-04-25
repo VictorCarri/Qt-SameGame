@@ -625,7 +625,7 @@ int Game::removeBlocks(int m_x, int m_y, int m_col)
     {
         qDebug() << "Game::removeBlocks: passed error check";
 
-        if (hasAdjBlockOfSameColour(m_x, m_y)) // Can only delete a block if it has adjacent blocks of the same colour
+        if (hasAdjBlockOfSameColour(m_x, m_y) == 1) // Can only delete a block if it has adjacent blocks of the same colour
         {
             qDebug() << "Game::removeBlocks: passed adjacency check";
 
@@ -689,7 +689,7 @@ void Game::compactBoard()
     {
         for (r = 0; r < m_maxRow; r++) // Loop through the rows from left to right
         {
-            qDebug() << "Game::compactBoard: phase 1: checking (" << c << ", " << r << ")" << endl;
+            //qDebug() << "Game::compactBoard: phase 1: checking (" << c << ", " << r << ")" << endl;
 
             if (c_board->at(r).at(c) != BLACK) // This cell isn't empty
             {
@@ -721,7 +721,7 @@ void Game::compactBoard()
             if (c_board->at(r).at(c) != BLACK) // This cell isn't empty
             {
                 c_newY = r; // While loop looks down, start 1 above it
-                qDebug() << "Game::compactBoard: phase 2: c_newY = " << c_newY << " before while" << endl;
+                //qDebug() << "Game::compactBoard: phase 2: c_newY = " << c_newY << " before while" << endl;
 
                 while (c_newY < (m_maxRow-1) && c_board->at(c_newY+1).at(c) == BLACK) // While we see empty cells below us and we're not yet at the last row
                 {
