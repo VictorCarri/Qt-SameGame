@@ -1,5 +1,5 @@
-#ifndef BOARDVIEW_H
-#define BOARDVIEW_H
+#ifndef BOARDVIEW_HPP
+#define BOARDVIEW_HPP
 
 /* Qt includes */
 #include <QWidget>
@@ -30,8 +30,10 @@ class BoardView : public QWidget
         /* Event handlers */
         void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE; // Handles painting by redrawing the board
 
+        /* Event signals */
     signals:
 
+        /* Event handlers */
     public slots:
 
     private: // Private stuff
@@ -39,4 +41,4 @@ class BoardView : public QWidget
         vector<vector<QColor>> c_grid; // 2D vector holding colours of each square to draw
 };
 
-#endif // BOARDVIEW_H
+#endif // BOARDVIEW_HPP

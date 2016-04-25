@@ -8,6 +8,7 @@
 /* Qt headers */
 #include <QDebug> // qDebug()
 #include <qglobal.h> // qsrand(), qrand()
+#include <QDateTime> // QDateTime class (get # of seconds since epoch for randomization)
 
 using namespace std; // To save some typing
 
@@ -154,9 +155,13 @@ int Game::removeBlock(int m_x, int m_y)
 
     if (errorCheck(m_x, m_y) == 0) // X and y aren't invalid, we're not trying to delete a background block, and the block has adjacent squares of the same colour
     {
+        qDebug() << "Game::removeBlock: passed error check";
+
         if (hasAdjBlockOfSameColour(m_x, m_y)) // Can only remove a block if it has at least 1 neighbour of the same colour
         {
+            qDebug() << "Game::removeBlock: passed adj of same colour check";
             m_nBlocksRemoved = removeBlocks(m_x, m_y, c_board->at(m_y).at(m_x)); // Remove all adjacent blocks of this colour
+            qDebug() << "Game::removeBlock: passed removeBlocks";
 
             if (m_nBlocksRemoved > 0) // Blocks were removed
             {
@@ -350,35 +355,35 @@ void Game::initBoard()
             c_board->at(r)[c] = col; // Set the value at this row and column to the generated colour index
             c_cBlocks.enqueue(pair<int, int>(c, r)); // Add the coords of the initialised block to the queue of changed blocks so that it can be processed by the controller later on*/
 
-            qDebug() << "Checking cell (" << c << ", " << r << ")";
+            //qDebug() << "Checking cell (" << c << ", " << r << ")";
 
             if (c_board->at(r).at(c) == BLACK) // We don't want to change coloured squares
             {
-                qDebug() << "Cell (" << c << ", " << r << ") is black.";
+                //qDebug() << "Cell (" << c << ", " << r << ") is black.";
                 randColInd = randIntInRange(1, c_colours->size()-1); // Choose a random colour index
-                qDebug() << "Chosen colour index = " << randColInd;
+                //qDebug() << "Chosen colour index = " << randColInd;
                 c_board->at(r)[c] = randColInd; // Set this cell's colour to the randomly-chosen one
                 c_cBlocks.enqueue(pair<int, int>(c, r)); // Add changed block to queue
-                qDebug() << "After assignment, colour index at (" << c << ", " << r << ") = " << c_board->at(r).at(c);
+                //qDebug() << "After assignment, colour index at (" << c << ", " << r << ") = " << c_board->at(r).at(c);
 
                 /* Choose a random direction with at least 1 black square */
                 while (!dirChosen) // Loop until a direction with at least 1 black square has been chosen
                 {
-                    qDebug() << "No dir chosen yet.";
+                    //qDebug() << "No dir chosen yet.";
                     randDir = randIntInRange(LEFT, BOTTOM); // Choose a random direction
-                    qDebug() << "Random dir = " << randDir;
+                    //qDebug() << "Random dir = " << randDir;
 
                     /* Ensure that we haven't already checked that direction */
                     if (find(usedDirs.begin(), usedDirs.end(), randDir) == std::end(usedDirs)) // The list doesn't contain that direction, so we haven't used it yet
                     {
-                        qDebug() << "Checking (currently) unchecked dir " << randDir;
+                        //qDebug() << "Checking (currently) unchecked dir " << randDir;
 
                         /* Check if there is at least 1 black square in that direction */
                         switch (randDir) // Handle checks in different directions separately
                         {
                             case LEFT: // Checking the left
                             {
-                                qDebug() << "Checking left" << endl << "errorCheck(" << c-1 << ", " << r << ") = " << errorCheck(c-1, r);
+                                //qDebug() << "Checking left" << endl << "errorCheck(" << c-1 << ", " << r << ") = " << errorCheck(c-1, r);
 
                                 /* Use errorCheck to determine if square exists and is black. errorCheck returns -2 in this case */
                                 if (errorCheck(c-1, r) == -2) // Square to left exists and is black
@@ -396,14 +401,14 @@ void Game::initBoard()
                                         c_curX--; // Check the cell to the left on the next loop
                                     }
 
-                                    nToFill = randIntInRange(1, nFSqs); // Choose between 1 and the # of free squares in this direction to fill.
+                                    nToFill = randIntInRange(1, nFSqs/2); // Choose between 1 and the # of free squares in this direction to fill.
                                     c_curX = c-1; // Move 1 step to the left
 
                                     while (nToFill > 0) // Keep filling squares until we have filled all of the ones which we wanted to fill
                                     {
                                         c_board->at(c_curY)[c_curX] = randColInd; // Set the square to the randomly-chosen colour
                                         c_cBlocks.enqueue(pair<int, int>(c_curX, c_curY)); // Add changed block to queue
-                                        qDebug() << "Set (" << c_curX << ", " << c_curY << ") to " << c_board->at(c_curY).at(c_curX);
+                                     //   qDebug() << "Set (" << c_curX << ", " << c_curY << ") to " << c_board->at(c_curY).at(c_curX);
                                         c_curX--; // Move left for next loop
                                         nToFill--; // Count this square to stop loop eventually
                                     }
@@ -414,7 +419,7 @@ void Game::initBoard()
 
                             case RIGHT: // Checking the right
                             {
-                                qDebug() << "Checking right" << endl << "errorCheck(" << c+1 << ", " << r << ") = " << errorCheck(c+1, r);
+                                //qDebug() << "Checking right" << endl << "errorCheck(" << c+1 << ", " << r << ") = " << errorCheck(c+1, r);
 
                                 /* Use errorCheck to determine if square exists and is black. errorCheck returns -2 in this case */
                                 if (errorCheck(c+1, r) == -2) // Square to right exists and is black
@@ -439,7 +444,7 @@ void Game::initBoard()
                                     {
                                         c_board->at(c_curY)[c_curX] = randColInd; // Set the square to the randomly-chosen colour
                                         c_cBlocks.enqueue(pair<int, int>(c_curX, c_curY)); // Add changed block to queue
-                                        qDebug() << "Set (" << c_curX << ", " << c_curY << ") to " << c_board->at(c_curY).at(c_curX);
+                                  //      qDebug() << "Set (" << c_curX << ", " << c_curY << ") to " << c_board->at(c_curY).at(c_curX);
                                         c_curX++; // Move right for next loop
                                         nToFill--; // Count this square to stop loop eventually
                                     }
@@ -450,7 +455,7 @@ void Game::initBoard()
 
                             case TOP: // Checking the top
                             {
-                                qDebug() << "Checking top" << endl << "errorCheck(" << c << ", " << r-1 << ") = " << errorCheck(c, r-1);
+                                //qDebug() << "Checking top" << endl << "errorCheck(" << c << ", " << r-1 << ") = " << errorCheck(c, r-1);
 
                                 /* Use errorCheck to determine if square exists and is black. errorCheck returns -2 in this case */
                                 if (errorCheck(c, r-1) == -2) // Square above exists and is black
@@ -475,7 +480,7 @@ void Game::initBoard()
                                     {
                                         c_board->at(c_curY)[c_curX] = randColInd; // Set the square to the randomly-chosen colour
                                         c_cBlocks.enqueue(pair<int, int>(c_curX, c_curY)); // Add changed block to queue
-                                        qDebug() << "Set (" << c_curX << ", " << c_curY << ") to " << c_board->at(c_curY).at(c_curX);
+                                  //      qDebug() << "Set (" << c_curX << ", " << c_curY << ") to " << c_board->at(c_curY).at(c_curX);
                                         c_curY--; // Move up for next loop
                                         nToFill--; // Count this square to stop loop eventually
                                     }
@@ -486,7 +491,7 @@ void Game::initBoard()
 
                             case BOTTOM: // Checking the bottom
                             {
-                                qDebug() << "Checking bottom" << endl << "errorCheck(" << c << ", " << r+1 << ") = " << errorCheck(c, r+1);
+                                //qDebug() << "Checking bottom" << endl << "errorCheck(" << c << ", " << r+1 << ") = " << errorCheck(c, r+1);
 
                                 /* Use errorCheck to determine if square exists and is black. errorCheck returns -2 in this case */
                                 if (errorCheck(c, r+1) == -2) // Square below exists and is black
@@ -511,7 +516,7 @@ void Game::initBoard()
                                     {
                                         c_board->at(c_curY)[c_curX] = randColInd; // Set the square to the randomly-chosen colour
                                         c_cBlocks.enqueue(pair<int, int>(c_curX, c_curY)); // Add changed block to queue
-                                        qDebug() << "Set (" << c_curX << ", " << c_curY << ") to " << c_board->at(c_curY).at(c_curX);
+                                 //       qDebug() << "Set (" << c_curX << ", " << c_curY << ") to " << c_board->at(c_curY).at(c_curX);
                                         c_curY++; // Move down for next loop
                                         nToFill--; // Count this square to stop loop eventually
                                     }
@@ -539,12 +544,14 @@ void Game::initBoard()
  */
 int Game::randIntInRange(int lBound, int uBound)
 {
-    qsrand(qrand()); // Seed RNG with initial value
+    //qsrand(QDateTime::currentMSecsSinceEpoch()); // Seed RNG with current milliseconds since epoch initial value
+    qsrand(qrand());
+    //srand(time(NULL)); // Seed RNG
     return qrand() % ((uBound + 1) - lBound) + lBound;
     //return qrand() % (uBound - lBound) + lBound + 1;
     //srand(rand());
     //return rand() % (uBound - lBound) + lBound + 1;
-    // return rand() % ((uBound+1) - lBound) + 1;
+    //return rand() % ((uBound+1) - lBound) + 1;
 }
 
 /**
@@ -616,8 +623,12 @@ int Game::removeBlocks(int m_x, int m_y, int m_col)
 
     if (errorCheck(m_x, m_y) == 0) // We can delete a block at this location
     {
+        qDebug() << "Game::removeBlocks: passed error check";
+
         if (hasAdjBlockOfSameColour(m_x, m_y)) // Can only delete a block if it has adjacent blocks of the same colour
         {
+            qDebug() << "Game::removeBlocks: passed adjacency check";
+
             c_board->at(m_y)[m_x] = BLACK; // Delete the piece at this location (set square to black)
             nDeleted = 1; // Deleted 1 block
             c_points++; // Increment user's score
@@ -714,4 +725,24 @@ void Game::compactBoard()
             }
         }
     }
+}
+
+/**
+ * @brief Game::getNumCols Fetches the # of colours in the game.
+ * @return The number of colours in this game.
+ */
+int Game::getNumCols()
+{
+    return m_nColours; // Return the # of colours
+}
+
+/**
+ * @brief isCellEmpty Determines if a given cell is empty.
+ * @param m_x The x coord of the cell to check.
+ * @param m_y The y coord of the cell to check.
+ * @return False if the cell DNE or isn't empty, true otherwise.
+ */
+bool Game::isCellEmpty(int m_x, int m_y)
+{
+    return errorCheck(m_x, m_y) == -2; // Errorcheck returns -2 if square exists but is black
 }

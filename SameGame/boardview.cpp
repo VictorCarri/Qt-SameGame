@@ -23,8 +23,7 @@ BoardView::BoardView(QWidget *parent) : QWidget(parent), // Initialise parent
     canDraw(false), // Draw black initially
     c_grid(5, vector<QColor>(5, QColor(0, 0, 0))) // Initialize grid to 5x5 array of black
 {
-    /* Window setup */
-    resize(500, 500);
+    /* Widget setup */
     update(); // Initial paint
 }
 
@@ -53,22 +52,14 @@ pair<int, int> BoardView::toModelCoords(int m_clickX, int m_clickY)
     int c_modelX; // Model x coord
     int c_modelY; // Model y coord
 
-    if (canDraw) // Prevent null pointer exceptions
-    {
-        cellWidth = screenWidth / c_grid[0].size(); // Width of a cell = total width / # of columns
-        cellHeight = screenHeight / c_grid.size(); // Cell height = total height / # of rows
+    cellWidth = screenWidth / c_grid[0].size(); // Width of a cell = total width / # of columns
+    cellHeight = screenHeight / c_grid.size(); // Cell height = total height / # of rows
 
-        /* Part 2: convert click point to model point */
-        c_modelX = floor(m_clickX / cellWidth); // Dividing the distance from 0 to x (x) by the width of a cell gives you the # of “cell width units” away from the left - the x co-ord of the cell, in model (cell) units
-        c_modelY = floor(m_clickY / cellHeight); // Same principle as above, but for y and height
+    /* Part 2: convert click point to model point */
+    c_modelX = floor(m_clickX / cellWidth); // Dividing the distance from 0 to x (x) by the width of a cell gives you the # of “cell width units” away from the left - the x co-ord of the cell, in model (cell) units
+    c_modelY = floor(m_clickY / cellHeight); // Same principle as above, but for y and height
 
-        return pair<int, int>(c_modelX, c_modelY); // Return a pair of integers containing the model coords
-    }
-
-    else // Not drawing board yet
-    {
-        return pair<int, int>(-1, -1); // Return pair of -1s to indicate error
-    }
+    return pair<int, int>(c_modelX, c_modelY); // Return a pair of integers containing the model coords
 }
 
 /**
@@ -106,7 +97,7 @@ int BoardView::setSquareColour(unsigned m_x, unsigned m_y, QColor m_col)
         m_x < c_grid[0].size()) // x is within bounds
     {
         c_grid[m_y][m_x] = m_col; // Store the new colour
-        repaint(); // Redraw the board
+        update(); // Redraw the board
         return 0; // Indicate successful completion
     }
 
@@ -123,7 +114,7 @@ int BoardView::setSquareColour(unsigned m_x, unsigned m_y, QColor m_col)
  */
 void BoardView::setBoardSize(unsigned m_newWidth, unsigned m_newHeight)
 {
-    int r; // Row counter
+    unsigned r; // Row counter
 
     if (m_newWidth > 0 && m_newHeight > 0) // Bounds check
     {
@@ -135,7 +126,7 @@ void BoardView::setBoardSize(unsigned m_newWidth, unsigned m_newHeight)
             c_grid[r].resize(m_newWidth, QColor(0, 0, 0)); // Resize this column vector to the new width, adding black elements if necessary
         }
 
-        repaint(); // Redraw the board with the new size
+        update(); // Redraw the board with the new size
     }
 }
 
@@ -145,7 +136,7 @@ void BoardView::setBoardSize(unsigned m_newWidth, unsigned m_newHeight)
  * @brief BoardView::paintEvent Paints the board on the widget when necessary.
  * @param event The paint event.
  */
-void BoardView::paintEvent(QPaintEvent * event)
+void BoardView::paintEvent(QPaintEvent * m_event)
 {
     QPainter painter(this); // Painter for drawing board
     QColor black(0, 0, 0); // Black colour
@@ -160,7 +151,7 @@ void BoardView::paintEvent(QPaintEvent * event)
     {
         //qDebug() << "Cell width = " << cellWidth << endl << "Cell Height = " << cellHeight << endl;
 
-        painter.setPen(black); // Draw the outline in black
+        painter.setPen(QPen(QBrush(black), 5)); // Draw the outline in black
 
         for (r = 0; r < nRows; r++) // Loop through rows of board
         {

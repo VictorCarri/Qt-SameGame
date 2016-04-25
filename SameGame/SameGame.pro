@@ -15,13 +15,16 @@ TEMPLATE = app
 SOURCES += main.cpp\
         samegamewindow.cpp \
     game.cpp \
-    boardview.cpp
+    boardview.cpp \
+    newgamedialog.cpp
 
 HEADERS  += \
     boardview.hpp \
     game.hpp \
-    samegamewindow.hpp
+    samegamewindow.hpp \
+    newgamedialog.hpp
 
-FORMS    += samegamewindow.ui
+FORMS    += samegamewindow.ui \
+    newgamedialog.ui
 
 QMAKE_CXXFLAGS += -std=c++11
