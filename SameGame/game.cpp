@@ -165,7 +165,9 @@ int Game::removeBlock(int m_x, int m_y)
 
             if (m_nBlocksRemoved > 0) // Blocks were removed
             {
+                c_points += (m_nBlocksRemoved*(m_nBlocksRemoved+1))/2; // Score increases w/ each block, so it's sum(i=1 to nDeleted, i).
                 compactBoard(); // Push together blocks, top to bottom, right to left, to get rid of gaps caused by the deletion
+                qDebug() << "Game::removeBlock: passed compactBoard";
             }
         }
     }
@@ -245,13 +247,15 @@ int Game::hasAdjBlockOfSameColour(int m_row, int m_col)
     vector<pair<int, int>> adj; // Vector containing adjacent blocks
     pair<int, int> coord; // A single coordinate in the vector
 
-    if (errorCheck(m_row, m_col)) // Check for errors in the given coords - x and y are valid, and this isn't a black square
+    if (errorCheck(m_col, m_row) == 0) // Check for errors in the given coords - x and y are valid, and this isn't a black square
     {
+        qDebug() << "Game::hasAdjBlockOfSameColour: passed error check";
         adj = adjBlocks(m_row, m_col); // Get a list of this cell's neighbours
 
         for (vector<pair<int, int>>::iterator it = adj.begin(); it != adj.end(); it++) // Loop through list of adjacent blocks
         {
             coord = *it; // Store the coordinate of the adjacent block
+            qDebug() << "Game::hasAdjBlockOfSameColour: checking adjacent location (" << get<1>(coord) << ", " << get<0>(coord) << ")";
 
             if (c_board->at(get<0>(coord)).at(get<1>(coord)) == myCol) // If the block at this position is of the same colour
             {
@@ -625,19 +629,20 @@ int Game::removeBlocks(int m_x, int m_y, int m_col)
     {
         qDebug() << "Game::removeBlocks: passed error check";
 
-        if (hasAdjBlockOfSameColour(m_x, m_y) == 1) // Can only delete a block if it has adjacent blocks of the same colour
-        {
+        /*if (hasAdjBlockOfSameColour(m_y, m_x) == 1) // Can only delete a block if it has adjacent blocks of the same colour
+        {*/
             qDebug() << "Game::removeBlocks: passed adjacency check";
 
             c_board->at(m_y)[m_x] = BLACK; // Delete the piece at this location (set square to black)
             nDeleted = 1; // Deleted 1 block
-            c_points++; // Increment user's score
             c_cBlocks.enqueue(pair<int, int>(m_x, m_y)); // Add the coords of the deleted block to the queue of changed blocks
 
             /** TODO: Add error checks around colour checks, to ensure that the square exists **/
 
             if (errorCheck(m_x-1, m_y) == 0) // Block must exist and not be black
             {
+                qDebug() << "Game::removeBlocks(): error check of (" << m_x-1 << ", " << m_y << ") passed.";
+
                 /* If there are any adjacent blocks of the same colour, remove them and check their neighbours as well */
                 if (c_board->at(m_y).at(m_x-1) == m_col) // Block of same colour to left
                 {
@@ -647,6 +652,8 @@ int Game::removeBlocks(int m_x, int m_y, int m_col)
 
             if (errorCheck(m_x+1, m_y) == 0) // Block must exist and not be black
             {
+                qDebug() << "Game::removeBlocks(): error check of (" << m_x+1 << ", " << m_y << ") passed.";
+
                 if (c_board->at(m_y).at(m_x+1) == m_col) // Same colour block to right
                 {
                     nDeleted += removeBlocks(m_x+1, m_y, m_col); // Delete it and any neighbours of the same colour, and count the # of blocks deleted by that call
@@ -655,6 +662,8 @@ int Game::removeBlocks(int m_x, int m_y, int m_col)
 
             if (errorCheck(m_x, m_y-1) == 0) // Block must exist and not be black
             {
+                qDebug() << "Game::removeBlocks(): error check of (" << m_x << ", " << m_y-1 << ") passed.";
+
                 if (c_board->at(m_y-1).at(m_x) == m_col) // Same colour block above
                 {
                     nDeleted += removeBlocks(m_x, m_y-1, m_col); // Delete it and its neighbours, and include # of deletions in return value
@@ -663,13 +672,19 @@ int Game::removeBlocks(int m_x, int m_y, int m_col)
 
             if (errorCheck(m_x, m_y+1) == 0) // Block must exist and not be black
             {
+                qDebug() << "Game::removeBlocks(): error check of (" << m_x << ", " << m_y+1 << ") passed.";
+
                 if (c_board->at(m_y+1).at(m_x) == m_col) // Same colour block below
                 {
                     nDeleted += removeBlocks(m_x, m_y+1, m_col); // Delete block and its neighbours, and include count in total
                 }
             }
         }
-    }
+
+       /* else // DEBUGGING
+        {
+            qDebug() << "Game::removeBlocks: hasAdjBlockOfSameColour(" << m_y << ", " << m_x << ") failed (returned " << hasAdjBlockOfSameColour(m_y, m_x) << ")";
+        }*/
 
     return nDeleted; // Return the # of blocks deleted on this call
 }
@@ -759,4 +774,13 @@ int Game::getNumCols()
 bool Game::isCellEmpty(int m_x, int m_y)
 {
     return errorCheck(m_x, m_y) == -2; // Errorcheck returns -2 if square exists but is black
+}
+
+/**
+ * @brief Game::getPoints Fetches the user's score.
+ * @return  The user's score.
+ */
+int Game::getPoints()
+{
+    return c_points; // Return the user's score
 }

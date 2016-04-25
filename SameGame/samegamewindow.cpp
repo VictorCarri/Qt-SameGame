@@ -154,6 +154,9 @@ bool SameGameWindow::eventFilter(QObject *object, QEvent *event)
                         mb.setText("Unfortunately, you don't have any moves left.\nBetter luck next time!");
                         mb.exec();
                     }
+
+                    delete c_model; // Delete the model, now that the game has finished
+                    c_model = 0;
                 }
             }
 

@@ -33,6 +33,7 @@ class Game
         void clearChangedBlocks(); // Empties the queue of changed blocks
         int getNumCols(); // Returns the number of colours
         bool isCellEmpty(int m_x, int m_y); // Returns true if the cell at the given (x, y) pos exists and is empty, false otherwise
+        int getPoints(); // Fetches the user's score
 
     private:
         /** Game methods **/
