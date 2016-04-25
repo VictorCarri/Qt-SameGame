@@ -634,6 +634,8 @@ int Game::removeBlocks(int m_x, int m_y, int m_col)
             c_points++; // Increment user's score
             c_cBlocks.enqueue(pair<int, int>(m_x, m_y)); // Add the coords of the deleted block to the queue of changed blocks
 
+            /** TODO: Add error checks around colour checks, to ensure that the square exists **/
+
             /* If there are any adjacent blocks of the same colour, remove them and check their neighbours as well */
             if (c_board->at(m_y).at(m_x-1) == m_col) // Block of same colour to left
             {
