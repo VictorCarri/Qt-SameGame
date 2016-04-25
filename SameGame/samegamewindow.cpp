@@ -127,9 +127,9 @@ bool SameGameWindow::eventFilter(QObject *object, QEvent *event)
 
             modelCoords = c_view->centralWidget->toModelCoords(mouseEv->x(), mouseEv->y()); // Get view to convert click coords to model coords, and store them
 
-           /* msgFormatted = msgUnformatted.arg(mouseEv->x()).arg(mouseEv->y()).arg(get<0>(modelCoords)).arg(get<1>(modelCoords)); // Replace params w/ x and y coords, and store result
+            msgFormatted = msgUnformatted.arg(mouseEv->x()).arg(mouseEv->y()).arg(get<0>(modelCoords)).arg(get<1>(modelCoords)); // Replace params w/ x and y coords, and store result
             mb.setText(msgFormatted); // Set message box text to coords text
-            mb.exec(); // Show the message*/
+            mb.exec(); // Show the message
 
             /* Check if it's a black square. We don't care about clicks on them. */
             if (!c_model->isCellEmpty(get<0>(modelCoords), get<1>(modelCoords))) // This cell isn't empty, so we can delete blocks

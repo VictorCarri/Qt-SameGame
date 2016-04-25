@@ -157,7 +157,7 @@ int Game::removeBlock(int m_x, int m_y)
     {
         qDebug() << "Game::removeBlock: passed error check";
 
-        if (hasAdjBlockOfSameColour(m_x, m_y)) // Can only remove a block if it has at least 1 neighbour of the same colour
+        if (hasAdjBlockOfSameColour(m_x, m_y) == 1) // Can only remove a block if it has at least 1 neighbour of the same colour
         {
             qDebug() << "Game::removeBlock: passed adj of same colour check";
             m_nBlocksRemoved = removeBlocks(m_x, m_y, c_board->at(m_y).at(m_x)); // Remove all adjacent blocks of this colour
@@ -244,6 +244,7 @@ int Game::getMaxCol()
 int Game::hasAdjBlockOfSameColour(int m_row, int m_col)
 {
     int myCol = c_board->at(m_row).at(m_col); // Store the colour of this block for later comparison. Saves some calls.
+    qDebug() << "Colour of block at (" << m_col << ", " << m_row << ") = " << myCol;
     vector<pair<int, int>> adj; // Vector containing adjacent blocks
     pair<int, int> coord; // A single coordinate in the vector
 
@@ -259,10 +260,12 @@ int Game::hasAdjBlockOfSameColour(int m_row, int m_col)
 
             if (c_board->at(get<0>(coord)).at(get<1>(coord)) == myCol) // If the block at this position is of the same colour
             {
+                qDebug() << "Game::hasAdjBlockOfSameColour: found matching colour (" << c_board->at(get<0>(coord)).at(get<1>(coord)) << ")" << endl;
                 return 1; // Found an adjacent block of the same colour
             }
         }
 
+        qDebug() << "Game::hasAdjBlockOfSameColour: returning 0" << endl;
         return 0; // Didn't find any neighbours with the same colour
     }
 
@@ -282,43 +285,38 @@ vector<pair<int, int>> Game::adjBlocks(int m_row, int m_col)
 {
     vector<pair<int, int>> adjBs; // Vector of adjacent blocks
 
+    qDebug() << "Game::adjBlocks: checking coord (" << m_col << ", " << m_row << ").";
+
     /* Check for neighbours in all directions */
 
     // Check for neighbour to left
-    if ((0 <= (m_col-1) && (m_col-1) < m_maxCol) // Check if m_col-1 is in range [0, m_maxCol)
-        &&
-        (0 <= m_row && m_row < m_maxRow)) // Check if m_row is in range [0, m_maxRow)
+    if (errorCheck(m_col-1, m_row) != -1)
     {
+        qDebug() << "Game::adjBlocks: coord (" << m_col-1 << ", " << m_row << ") exists. Adding it to vector.";
         // There is a block to the left
         adjBs.push_back(pair<int, int>(m_row, m_col-1)); // Add the coord (m_row, m_col-1) to the vector
     }
 
     // Check for neighbour to right
-    else if ((0 <= (m_col+1) && (m_col+1) < m_maxCol) // m_col+1 is in range [0, m_maxCol)
-             &&
-             (0 <= m_row && m_row < m_maxRow) // m_row is in range [0, m_maxRow)
-             )
+    else if (errorCheck(m_col+1, m_row) != -1)
     {
+        qDebug() << "Game::adjBlocks: coord (" << m_col+1 << ", " << m_row << ") exists. Adding it to vector.";
         // There is a block to the right
         adjBs.push_back(pair<int, int>(m_row, m_col+1)); // Add coord (m_row, m_col+1) to list of coords
     }
 
     // Check for neighbour above
-    else if ((0 <= m_col && m_col < m_maxCol) // m_col is in range [0, m_maxCol)
-             &&
-             (0 <= (m_row-1) && (m_row-1) < m_maxRow) // m_row-1 is in range [0, m_maxRow)
-             )
+    else if (errorCheck(m_col, m_row-1) != -1)
     {
+        qDebug() << "Game::adjBlocks: coord (" << m_col << ", " << m_row-1 << ") exists. Adding it to vector.";
         // There is a square above
         adjBs.push_back(pair<int, int>(m_row-1, m_col));
     }
 
     // Check for neighbour below
-    else if ((0 <= m_col && m_col < m_maxCol) // m_col is in range [0, m_maxCol)
-             &&
-             (0 <= (m_row+1) && (m_row+1) < m_maxRow) // m_row+1 is in range [0, m_maxRow)
-             )
+    else if (errorCheck(m_col, m_row+1) != -1)
     {
+        qDebug() << "Game::adjBlocks: coord (" << m_col << ", " << m_row+1 << ") exists. Adding it to vector.";
         // There is a block below
         adjBs.push_back(pair<int, int>(m_row+1, m_col)); // Add the coord (m_row+1, m_col) to the vector
     }
@@ -572,16 +570,22 @@ bool Game::noMovesLeft()
     {
         for (c = 0; c < m_maxCol; c++) // Loop through the columns
         {
+            qDebug() << "Game::noMovesLeft: checking (" << c << ", " << r << ") (" << c_board->at(r).at(c) << ")";
+
             if (c_board->at(r).at(c) != BLACK) // Found coloured square - we don't care about black ones
             {
-                if (hasAdjBlockOfSameColour(r, c)) // Found an adjacent block of the same colour
+                qDebug() << "Game::noMovesLeft: (" << c << ", " << r << ") isn't black, it's (" << c_board->at(r).at(c) << ")";
+
+                if (hasAdjBlockOfSameColour(r, c) == 1) // Found an adjacent block of the same colour
                 {
+                    qDebug() << "Game::noMovesLeft: this square has an adjacent block of the same colour. Returning false." << endl;
                     return false; // This block can be deleted - at least 1 block adjacent to it has the same colour
                 }
             }
         }
     }
 
+    qDebug() << "Game::noMovesLeft: returning true" << endl;
     return true; // If we got here, there are no more moves left
 }
 
