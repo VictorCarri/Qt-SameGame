@@ -39,27 +39,19 @@
     <addaction name="actionSave_Game"/>
     <addaction name="actionLoad_Game"/>
    </widget>
-   <widget class="QMenu" name="menuSettings">
-    <property name="title">
-     <string>Settings</string>
-    </property>
-    <addaction name="actionBoard_Size"/>
-    <addaction name="actionNumber_of_Colours"/>
-   </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
      <string>About</string>
     </property>
-    <addaction name="actionGame"/>
     <addaction name="actionAuthor"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
      <string>Help</string>
     </property>
+    <addaction name="actionGame"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuSettings"/>
    <addaction name="menuHelp"/>
    <addaction name="menuAbout"/>
   </widget>
@@ -97,31 +89,12 @@
     <string>Ctrl+L</string>
    </property>
   </action>
-  <action name="actionBoard_Size">
-   <property name="text">
-    <string>Board Size</string>
-   </property>
-   <property name="toolTip">
-    <string>Shows a dialog which allows you to change the size that will be used for the next game.</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+B</string>
-   </property>
-  </action>
-  <action name="actionNumber_of_Colours">
-   <property name="text">
-    <string>Number of Colours</string>
-   </property>
-   <property name="toolTip">
-    <string>Shows a dialog which allows you to choose the number of colours used for the next game.</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+C</string>
-   </property>
-  </action>
   <action name="actionGame">
    <property name="text">
-    <string>Game</string>
+    <string>How to play</string>
+   </property>
+   <property name="toolTip">
+    <string>Shows a dialog explaining how to play the game.</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+H</string>
@@ -130,6 +103,9 @@
   <action name="actionAuthor">
    <property name="text">
     <string>Author</string>
+   </property>
+   <property name="toolTip">
+    <string>Information about the author.</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+A</string>
