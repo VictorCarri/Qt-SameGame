@@ -16,13 +16,15 @@ SOURCES += main.cpp\
         samegamewindow.cpp \
     game.cpp \
     boardview.cpp \
-    newgamedialog.cpp
+    newgamedialog.cpp \
+    mainview.cpp
 
 HEADERS  += \
     boardview.hpp \
     game.hpp \
     samegamewindow.hpp \
-    newgamedialog.hpp
+    newgamedialog.hpp \
+    mainview.hpp
 
 FORMS    += samegamewindow.ui \
     newgamedialog.ui

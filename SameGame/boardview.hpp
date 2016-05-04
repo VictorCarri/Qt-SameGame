@@ -25,6 +25,8 @@ class BoardView : public QWidget
         pair<int, int> toModelCoords(int m_clickX, int m_clickY); // Converts a click position to a model position
         int setSquareColour(unsigned m_x, unsigned m_y, QColor m_col); // Sets the colour of a square at the given (x, y) pos to the given colour and redraws the board
         void setBoardSize(unsigned m_newWidth, unsigned m_newHeight); // Resizes grid to new width and height
+        void setDispScore(unsigned m_newScore); // Sets the score to display
+        void setGameInProg(bool m_newGameInProg); // Sets the "game in progress" variable which determines whether or not to draw the score
 
     protected:
         /* Event handlers */
@@ -37,8 +39,9 @@ class BoardView : public QWidget
     public slots:
 
     private: // Private stuff
-        bool canDraw; // Used to tell paintEvent whether or not it is allowed to draw anything but black
         vector<vector<QColor>> c_grid; // 2D vector holding colours of each square to draw
+        bool gameInProg; // Used to determine whether to draw score or not
+        int dispScore; // Score to display
 };
 
 #endif // BOARDVIEW_HPP

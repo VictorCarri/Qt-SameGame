@@ -82,6 +82,8 @@ void SameGameWindow::on_actionNew_Game_triggered()
         m_nColours = c_ngdiag->getNumColours(); // Store the # of colours chosen by the user
 
         c_view->centralWidget->setBoardSize(m_uMaxRow, m_uMaxCol); // Tell view to resize itself to m_uMaxRow x m_uMaxCol
+        c_view->centralWidget->setDispScore(0); // Start w/ a score of 0
+        c_view->centralWidget->setGameInProg(true); // Tell view to draw score
         c_model = new Game(m_uMaxRow, m_uMaxCol, m_nColours); // Create a new game with the current size, and the current # of colours
         updateView(); // Update the view with the new changes in the model
         e_curStat = IGAM; // Change to "in game" state
@@ -116,6 +118,7 @@ bool SameGameWindow::eventFilter(QObject *object, QEvent *event)
     QString msgFormatted; // Holds the formatted message
     pair<int, int> modelCoords; // Pair which holds model coords (converted by view)
 
+    /* Determine which event we have caught, and what object it was meant for */
     if (object == c_view->centralWidget && event->type() == QEvent::MouseButtonPress) // We will handle "clicks" on the board (a mouse button press)
     {
         if (e_curStat == IGAM) // We only care about clicks during a game
@@ -127,9 +130,9 @@ bool SameGameWindow::eventFilter(QObject *object, QEvent *event)
 
             modelCoords = c_view->centralWidget->toModelCoords(mouseEv->x(), mouseEv->y()); // Get view to convert click coords to model coords, and store them
 
-            msgFormatted = msgUnformatted.arg(mouseEv->x()).arg(mouseEv->y()).arg(get<0>(modelCoords)).arg(get<1>(modelCoords)); // Replace params w/ x and y coords, and store result
+            /*msgFormatted = msgUnformatted.arg(mouseEv->x()).arg(mouseEv->y()).arg(get<0>(modelCoords)).arg(get<1>(modelCoords)); // Replace params w/ x and y coords, and store result
             mb.setText(msgFormatted); // Set message box text to coords text
-            mb.exec(); // Show the message
+            mb.exec(); // Show the message*/
 
             /* Check if it's a black square. We don't care about clicks on them. */
             if (!c_model->isCellEmpty(get<0>(modelCoords), get<1>(modelCoords))) // This cell isn't empty, so we can delete blocks
@@ -141,6 +144,10 @@ bool SameGameWindow::eventFilter(QObject *object, QEvent *event)
                 if (c_model->isGameOver()) // The game has ended, for some reason
                 {
                     e_curStat = GEND; // Go to "end" state
+
+                    /* Update view */
+                    //c_view->centralWidget->setDispScore(0); // Reset score
+                    c_view->centralWidget->setGameInProg(false); // Tell view to draw score
 
                     /* Check if the user lost or won */
                     if (c_model->isBoardEmpty()) // Board is empty, so user won
@@ -185,6 +192,13 @@ void SameGameWindow::updateView()
      /* Variables */
      QQueue<pair<int, int>> m_changedBlocks; // Holds blocks which were changed in model
      pair<int, int> c_curBlock; // Holds the coords of the current block to change
+     /* DEBUGGING */
+     QMessageBox mb; // Message box
+     int nBlocksUpdated = 0;
+     QString msg;
+
+     /*mb.setText("Updating view...");
+     mb.exec();*/
 
      m_changedBlocks = c_model->getChangedBlocks(); // Get the queue of changed blocks from the model
 
@@ -192,7 +206,15 @@ void SameGameWindow::updateView()
      {
          c_curBlock = m_changedBlocks.dequeue(); // Fetch the coords of the next block to change
          c_view->centralWidget->setSquareColour(get<0>(c_curBlock), get<1>(c_curBlock), c_model->getColourFromIndex(c_model->getBlockColour(get<0>(c_curBlock), get<1>(c_curBlock)))); // Update the view's colour at this location with the new colour in the model
+         //++nBlocksUpdated;
      }
 
      c_model->clearChangedBlocks(); // Tell the model to clear its queue
+     c_view->centralWidget->setDispScore(c_model->getPoints()); // Draw the score
+
+     /* Debugging */
+     /*msg = "Updated %1 blocks.";
+     msg = msg.arg(nBlocksUpdated); // Tell user how many blocks were updated
+     mb.setText(msg);
+     mb.exec();*/
 }

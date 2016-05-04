@@ -32,20 +32,18 @@ enum Direction
  * @param cols The number of columns in this game
  * @param nColours The number of colours to use for this game. (excluding black, which is always used).
  */
-Game::Game(int rows, int cols, int nColours)
+Game::Game(int rows, int cols, int nColours) :
+    m_maxCol(cols), // Use given # of columns
+    m_maxRow(rows), // Use given # of rows
+    c_points(0), // Give user 0 points at start of game
+    m_nColours(nColours) // Initialize # of colours
 {
     int i; // Loop counter
     int r, g, b; // Hold randomised red, green, and blue values
 
-    /* Initialise variables */
-    m_maxCol = cols; // Use the given # of columns
-    m_maxRow = rows; // Use the given # of rows
-    c_points = 0; // Initialize points to 0
-    m_nColours = nColours; // Save # of colours
-    //c_cBlocks(); // Create the queue of changed blocks
+    /* Init vars */
     c_board = new vector<vector<int>>(m_maxRow, vector<int>(m_maxCol, 0)); // Create the board vector and initialize it to m_maxRow rows, containing m_maxCol columns of black each
     c_colours = new vector<QColor>(); // Create the vector of colours
-
     c_colours->push_back(QColor(0, 0, 0)); // Add black to vector first
 
     /* Initialise vector of colours to contain nColours random colours */
@@ -157,7 +155,7 @@ int Game::removeBlock(int m_x, int m_y)
     {
         qDebug() << "Game::removeBlock: passed error check";
 
-        if (hasAdjBlockOfSameColour(m_x, m_y) == 1) // Can only remove a block if it has at least 1 neighbour of the same colour
+        if (hasAdjBlockOfSameColour(m_y, m_x) == 1) // Can only remove a block if it has at least 1 neighbour of the same colour
         {
             qDebug() << "Game::removeBlock: passed adj of same colour check";
             m_nBlocksRemoved = removeBlocks(m_x, m_y, c_board->at(m_y).at(m_x)); // Remove all adjacent blocks of this colour
@@ -244,7 +242,7 @@ int Game::getMaxCol()
 int Game::hasAdjBlockOfSameColour(int m_row, int m_col)
 {
     int myCol = c_board->at(m_row).at(m_col); // Store the colour of this block for later comparison. Saves some calls.
-    qDebug() << "Colour of block at (" << m_col << ", " << m_row << ") = " << myCol;
+    qDebug() << "Game::hasAdjBlockOfSameColour: Colour of block at (" << m_col << ", " << m_row << ") = " << myCol;
     vector<pair<int, int>> adj; // Vector containing adjacent blocks
     pair<int, int> coord; // A single coordinate in the vector
 
@@ -256,7 +254,7 @@ int Game::hasAdjBlockOfSameColour(int m_row, int m_col)
         for (vector<pair<int, int>>::iterator it = adj.begin(); it != adj.end(); it++) // Loop through list of adjacent blocks
         {
             coord = *it; // Store the coordinate of the adjacent block
-            qDebug() << "Game::hasAdjBlockOfSameColour: checking adjacent location (" << get<1>(coord) << ", " << get<0>(coord) << ")";
+            qDebug() << "Game::hasAdjBlockOfSameColour: checking adjacent location (" << get<1>(coord) << ", " << get<0>(coord) << ") (colour = " << c_board->at(get<0>(coord)).at(get<1>(coord)) << ")";
 
             if (c_board->at(get<0>(coord)).at(get<1>(coord)) == myCol) // If the block at this position is of the same colour
             {
@@ -285,38 +283,38 @@ vector<pair<int, int>> Game::adjBlocks(int m_row, int m_col)
 {
     vector<pair<int, int>> adjBs; // Vector of adjacent blocks
 
-    qDebug() << "Game::adjBlocks: checking coord (" << m_col << ", " << m_row << ").";
+    //qDebug() << "Game::adjBlocks: checking coord (" << m_col << ", " << m_row << ").";
 
     /* Check for neighbours in all directions */
 
     // Check for neighbour to left
     if (errorCheck(m_col-1, m_row) != -1)
     {
-        qDebug() << "Game::adjBlocks: coord (" << m_col-1 << ", " << m_row << ") exists. Adding it to vector.";
+      //  qDebug() << "Game::adjBlocks: coord (" << m_col-1 << ", " << m_row << ") exists. Adding it to vector.";
         // There is a block to the left
         adjBs.push_back(pair<int, int>(m_row, m_col-1)); // Add the coord (m_row, m_col-1) to the vector
     }
 
     // Check for neighbour to right
-    else if (errorCheck(m_col+1, m_row) != -1)
+    if (errorCheck(m_col+1, m_row) != -1)
     {
-        qDebug() << "Game::adjBlocks: coord (" << m_col+1 << ", " << m_row << ") exists. Adding it to vector.";
+        //qDebug() << "Game::adjBlocks: coord (" << m_col+1 << ", " << m_row << ") exists. Adding it to vector.";
         // There is a block to the right
         adjBs.push_back(pair<int, int>(m_row, m_col+1)); // Add coord (m_row, m_col+1) to list of coords
     }
 
     // Check for neighbour above
-    else if (errorCheck(m_col, m_row-1) != -1)
+    if (errorCheck(m_col, m_row-1) != -1)
     {
-        qDebug() << "Game::adjBlocks: coord (" << m_col << ", " << m_row-1 << ") exists. Adding it to vector.";
+        //qDebug() << "Game::adjBlocks: coord (" << m_col << ", " << m_row-1 << ") exists. Adding it to vector.";
         // There is a square above
         adjBs.push_back(pair<int, int>(m_row-1, m_col));
     }
 
     // Check for neighbour below
-    else if (errorCheck(m_col, m_row+1) != -1)
+    if (errorCheck(m_col, m_row+1) != -1)
     {
-        qDebug() << "Game::adjBlocks: coord (" << m_col << ", " << m_row+1 << ") exists. Adding it to vector.";
+        //qDebug() << "Game::adjBlocks: coord (" << m_col << ", " << m_row+1 << ") exists. Adding it to vector.";
         // There is a block below
         adjBs.push_back(pair<int, int>(m_row+1, m_col)); // Add the coord (m_row+1, m_col) to the vector
     }
@@ -638,6 +636,7 @@ int Game::removeBlocks(int m_x, int m_y, int m_col)
             qDebug() << "Game::removeBlocks: passed adjacency check";
 
             c_board->at(m_y)[m_x] = BLACK; // Delete the piece at this location (set square to black)
+            qDebug() << "Game::removeBlocks: set (" << m_x << ", " << m_y << ") to black.";
             nDeleted = 1; // Deleted 1 block
             c_cBlocks.enqueue(pair<int, int>(m_x, m_y)); // Add the coords of the deleted block to the queue of changed blocks
 
@@ -703,7 +702,34 @@ void Game::compactBoard()
     int r; // Row counter
     int c; // Column counter
 
-    /* Phase 1: move coloured blocks left */
+    /* Phase 1: moving coloured blocks down */
+    for (c = 0; c < m_maxCol; c++) // For each column, from left to right
+    {
+        for (r = m_maxRow-1; r >= 0; r--) // For each row from bottom to top
+        {
+            if (c_board->at(r).at(c) != BLACK) // This cell isn't empty
+            {
+                c_newY = r; // While loop looks down, start 1 above it
+                //qDebug() << "Game::compactBoard: phase 2: c_newY = " << c_newY << " before while" << endl;
+
+                while (c_newY < (m_maxRow-1) && c_board->at(c_newY+1).at(c) == BLACK) // While we see empty cells below us and we're not yet at the last row
+                {
+                    c_newY++; // Move further down
+                    qDebug() << "Game::comapctboard: phase 2: while: c_newY = " << c_newY << " after inrement" << endl;
+                }
+
+                if (c_newY != r) // c_newY changed, therefore the block was moved
+                {
+                    c_board->at(c_newY)[c] = c_board->at(r).at(c); // Copy the old block's colour to the new location
+                    c_cBlocks.enqueue(pair<int, int>(c, c_newY)); // Add coords of changed block to queue
+                    c_board->at(r)[c] = BLACK; // Remove tile from old location
+                    c_cBlocks.enqueue(pair<int, int>(c, r)); // Add coords of changed block to queue
+                }
+            }
+        }
+    }
+
+    /* Phase 2: move coloured blocks left */
     for (c = 0; c < m_maxCol; c++) // Go from left to right, pushing things left
     {
         for (r = 0; r < m_maxRow; r++) // Loop through the rows from left to right
@@ -732,32 +758,6 @@ void Game::compactBoard()
         }
     }
 
-    /* Phase 2: moving down */
-    for (c = 0; c < m_maxCol; c++) // For each column, from left to right
-    {
-        for (r = m_maxRow-1; r >= 0; r--) // For each row from bottom to top
-        {
-            if (c_board->at(r).at(c) != BLACK) // This cell isn't empty
-            {
-                c_newY = r; // While loop looks down, start 1 above it
-                //qDebug() << "Game::compactBoard: phase 2: c_newY = " << c_newY << " before while" << endl;
-
-                while (c_newY < (m_maxRow-1) && c_board->at(c_newY+1).at(c) == BLACK) // While we see empty cells below us and we're not yet at the last row
-                {
-                    c_newY++; // Move further down
-                    qDebug() << "Game::comapctboard: phase 2: while: c_newY = " << c_newY << " after inrement" << endl;
-                }
-
-                if (c_newY != r) // c_newY changed, therefore the block was moved
-                {
-                    c_board->at(c_newY)[c] = c_board->at(r).at(c); // Copy the old block's colour to the new location
-                    c_cBlocks.enqueue(pair<int, int>(c, c_newY)); // Add coords of changed block to queue
-                    c_board->at(r)[c] = BLACK; // Remove tile from old location
-                    c_cBlocks.enqueue(pair<int, int>(c, r)); // Add coords of changed block to queue
-                }
-            }
-        }
-    }
 }
 
 /**

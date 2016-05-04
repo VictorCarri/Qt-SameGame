@@ -56,7 +56,7 @@ class SameGameWindow : public QMainWindow
         void on_actionGame_triggered(); // Handles a click on the Help->"How to play" menu item.
 
         /* Other */
-        bool eventFilter(QObject *object, QEvent *event); // Filters events for the board view and handles clicks
+        bool eventFilter(QObject *object, QEvent *event) Q_DECL_OVERRIDE; // Filters events for the board view and handles clicks
 
     private:
             /* Helper methods */

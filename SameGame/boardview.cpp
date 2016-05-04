@@ -20,8 +20,9 @@
  * @param parent The widget's parent.
  */
 BoardView::BoardView(QWidget *parent) : QWidget(parent), // Initialise parent
-    canDraw(false), // Draw black initially
-    c_grid(5, vector<QColor>(5, QColor(0, 0, 0))) // Initialize grid to 5x5 array of black
+    gameInProg(false), // Don't draw score text initially
+    c_grid(5, vector<QColor>(5, QColor(0, 0, 0))), // Initialize grid to 5x5 array of black
+    dispScore(0) // Display 0 initially
 {
     /* Widget setup */
     update(); // Initial paint
@@ -146,6 +147,8 @@ void BoardView::paintEvent(QPaintEvent * m_event)
     int nCols = c_grid[0].size(); // # of cols to draw
     int cellWidth = width() / nRows; // Width of a cell is total width / # of cells
     int  cellHeight = height() / nCols; // Cell height = total height / # of rows
+    QFont scoreFont("Times New Roman", 20, 5); // Bold, non-italic, size 20 Times New Roman
+    QString scoreStr = QString("Score: %1").arg(dispScore); // String to use for score. Contains token to be replaced by current score before display.
 
     try
     {
@@ -153,6 +156,7 @@ void BoardView::paintEvent(QPaintEvent * m_event)
 
         painter.setPen(QPen(QBrush(black), 5)); // Draw the outline in black
 
+        /* Draw squares of board */
         for (r = 0; r < nRows; r++) // Loop through rows of board
         {
             for (c = 0; c < nCols; c++) // Loop through columns of board
@@ -161,10 +165,39 @@ void BoardView::paintEvent(QPaintEvent * m_event)
                 painter.fillRect(c*cellWidth, r*cellHeight, cellWidth, cellHeight, c_grid[r][c]); // Draw the coloured square at this position using its colour
             }
         }
+
+        /* Determine whether or not to draw score */
+        if (gameInProg) // Game is in progress, draw the score
+        {
+            painter.setFont(scoreFont); // Use the score font
+            painter.setBrush(QBrush(QColor(255, 255, 255))); // Draw in white
+            painter.setPen(QPen(QColor(255, 255, 255))); // Draw text in white
+            painter.drawText((nCols-2)*cellWidth, cellHeight, scoreStr); // Draw the score string
+        }
     }
 
     catch (exception& e) // Catch all exceptions
     {
         qDebug() << "BoardView caught standard exception, with message: " << e.what() << endl; // Print a message
     }
+}
+
+/**
+ * @brief BoardView::setDispScore Sets the score to be displayed.
+ * @param m_newScore The new score to display.
+ */
+void BoardView::setDispScore(unsigned m_newScore) // Sets the score to display
+{
+    dispScore = m_newScore; // Store the new score
+    update(); // Redraw the screen to display the score
+}
+
+/**
+ * @brief setGameInProg Sets the boolean which controls whether or not the score is drawn.
+ * @param m_newGameInProg The new value of the boolean to use.
+ */
+void BoardView::setGameInProg(bool m_newGameInProg)
+{
+    gameInProg = m_newGameInProg; // Store the new value
+    update(); // Redraw the screen
 }
