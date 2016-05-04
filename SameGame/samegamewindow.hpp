@@ -1,11 +1,17 @@
-#ifndef SAMEGAMEWINDOW_H
-#define SAMEGAMEWINDOW_H
+#ifndef SAMEGAMEWINDOW_HPP
+#define SAMEGAMEWINDOW_HPP
 
 /* Qt classes */
-#include <QMainWindow>
+#include <QMainWindow> // Base class
+#include <QQueue> // For queue of changed blocks
 
 /* My classes */
+
+/* View */
 #include "boardview.hpp" // Board widget
+#include "newgamedialog.hpp" // New game dialog
+
+/* Model */
 #include "game.hpp" // Model
 
 namespace Ui {
@@ -37,25 +43,38 @@ class SameGameWindow : public QMainWindow
 {
     Q_OBJECT
 
-public:
-    explicit SameGameWindow(QWidget *parent = 0);
-    ~SameGameWindow();
+    public:
+        explicit SameGameWindow(QWidget *parent = 0);
+        ~SameGameWindow();
 
-    /* Controller methods */
-private slots:
-    /* File menu actions */
-    void on_actionNew_Game_triggered(); // Handles a click on the File->"New Game" menu item.
+    /** Controller methods **/
+    private slots:
+        /* File menu actions */
+        void on_actionNew_Game_triggered(); // Handles a click on the File->"New Game" menu item.
 
-    /* About menu actions */
-    void on_actionGame_triggered(); // Handles a click on the About->Game menu item.
+        /* Help menu actions */
+        void on_actionGame_triggered(); // Handles a click on the Help->"How to play" menu item.
 
-private:
-    Ui::SameGameWindow *c_view;
-    Game *c_model; // Pointer to object which holds the current game
-    State e_curStat; // Current state of game
-    int m_uMaxRow; // Contains # of rows set by user. Used to create a Game object.
-    int m_uMaxCol; // Contains # of columns set by user. Used to create a new Game object.
-    int m_nColours; // # of colours to use for the game.
+        /* Other */
+        bool eventFilter(QObject *object, QEvent *event); // Filters events for the board view and handles clicks
+
+    private:
+            /* Helper methods */
+            void updateView(); // Updates the view using the model's queue of changed blocks, and also clears the model's queue
+
+            /* View vars */
+            Ui::SameGameWindow *c_view; // Game window
+            NewGameDialog *c_ngdiag; // New game dialog
+
+            /* Model vars */
+            Game *c_model; // Pointer to object which holds the current game
+
+            /* Controller vars */
+            State e_curStat; // Current state of game
+            int m_uMaxRow; // Contains # of rows set by user. Used to create a Game object.
+            int m_uMaxCol; // Contains # of columns set by user. Used to create a new Game object.
+            int m_nColours; // # of colours to use for the game.
+            QEvent* event;
 };
 
-#endif // SAMEGAMEWINDOW_H
+#endif // SAMEGAMEWINDOW_HPP

@@ -1,5 +1,5 @@
-#ifndef GAME_H
-#define GAME_H
+#ifndef GAME_HPP
+#define GAME_HPP
 
 /* QT headers */
 #include <QColor> // Qt colour class for the board
@@ -31,6 +31,9 @@ class Game
         int getMaxCol(); // Fetches the # of columns in this game
         QQueue<pair<int, int>> getChangedBlocks(); // Returns the queue of recently-changed blocks
         void clearChangedBlocks(); // Empties the queue of changed blocks
+        int getNumCols(); // Returns the number of colours
+        bool isCellEmpty(int m_x, int m_y); // Returns true if the cell at the given (x, y) pos exists and is empty, false otherwise
+        int getPoints(); // Fetches the user's score
 
     private:
         /** Game methods **/
@@ -55,4 +58,4 @@ class Game
         QQueue<pair<int, int>> c_cBlocks; // Queue which holds coords of changed blocks for controller to query
 };
 
-#endif // GAME_H
+#endif // GAME_HPP
