@@ -51,6 +51,7 @@ class SameGameWindow : public QMainWindow
     private slots:
         /* File menu actions */
         void on_actionNew_Game_triggered(); // Handles a click on the File->"New Game" menu item.
+        void on_actionSave_Game_triggered(); // Handles a click on the File->"Save Game" menu item
 
         /* Help menu actions */
         void on_actionGame_triggered(); // Handles a click on the Help->"How to play" menu item.
@@ -58,7 +59,7 @@ class SameGameWindow : public QMainWindow
         /* Other */
         bool eventFilter(QObject *object, QEvent *event) Q_DECL_OVERRIDE; // Filters events for the board view and handles clicks
 
-    private:
+private:
             /* Helper methods */
             void updateView(); // Updates the view using the model's queue of changed blocks, and also clears the model's queue
 

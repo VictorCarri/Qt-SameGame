@@ -4,6 +4,7 @@
 /* QT headers */
 #include <QColor> // Qt colour class for the board
 #include <QQueue> // Qt queue class
+#include <QString> // QT strings
 
 /* C++ Headers */
 #include <array> // STL Arrays
@@ -20,7 +21,7 @@ class Game
     public:
         /* Constructors/destructors */
         Game(int rows, int cols, int nColours);
-        Game(string fname); // Constructor. Creates a new game object containing data loaded from a file with the name fname.
+        Game(QString fname); // Constructor. Creates a new game object containing data loaded from a file with the name fname.
         ~Game(); // Destructor. Deletes the new-ed variables and performs other cleanup as necessary.
         int getBlockColour(int m_x, int m_y); // Fetches the colour index of the block at the given index
         QColor getColourFromIndex(int ind); // Fetches the colour associated with a given index
@@ -34,6 +35,7 @@ class Game
         int getNumCols(); // Returns the number of colours
         bool isCellEmpty(int m_x, int m_y); // Returns true if the cell at the given (x, y) pos exists and is empty, false otherwise
         int getPoints(); // Fetches the user's score
+        int save(QString fname); // Saves the game's data to the given file name
 
     private:
         /** Game methods **/

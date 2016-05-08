@@ -8,6 +8,8 @@
 #include <QMessageBox> // Message box
 #include <QEvent> // For events
 #include <QMouseEvent> // For mouse events
+#include <QFileDialog> // To show the file-selection dialogs
+#include <QStandardPaths> // To get the user's home directory
 
 /* STL includes */
 #include <utility> // pair
@@ -50,7 +52,52 @@ SameGameWindow::~SameGameWindow()
     delete c_view; // Delete main view
 }
 
-/*** Controller methods ***/
+/**** Controller methods ****/
+
+/*** File menu actions ***/
+
+/**
+ * @brief SameGameWindow::on_actionSave_Game_triggered Handles the "Save Game" action.
+ */
+void SameGameWindow::on_actionSave_Game_triggered()
+{
+    QMessageBox mb; // Used to indicate info to user.
+    QString sFPath; // The save file path chosen by the user.
+    int mRet; // Return code of file writing
+
+    /* Can only save a game when a game is in progress */
+    if (e_curStat == IGAM) // A game is in progress, we can save
+    {
+        sFPath = QFileDialog::getSaveFileName(this, tr("Save Game"), QStandardPaths::writableLocation(QStandardPaths::HomeLocation), tr("SameGame save files (*.sgsv)")); // Show a save dialog and get a file name from the user
+
+        /* DEBUGGING */
+        mb.setText(QString("You chose to save to: %1").arg(sFPath)); // DEBUGGING: Set the message to show the path chosen by the user
+        mb.exec();
+
+        mRet = c_model->save(sFPath); // Get the model to save the data to this file
+
+        /* Check for errors */
+        if (mRet == 0) // No errors
+        {
+            /* Let user know that their game was successfully saved */
+            mb.setText(QString("Successfully saved game to: %1").arg(sFPath));
+            mb.exec();
+        }
+
+        else // Error
+        {
+            /* DEBUGGING: Let user know of error */
+            mb.setText(QString("Error in saving game: %1").arg(mRet)); // Setup error text
+            mb.exec(); // Show the message
+        }
+    }
+
+    else // No game in progress, error
+    {
+        mb.setText("No game is in progress. Nothing can be saved.");
+        mb.exec();
+    }
+}
 
 /**
  * @brief SameGameWindow::on_actionNew_Game_triggered Handles a click on the "New Game" menu item.
@@ -144,10 +191,6 @@ bool SameGameWindow::eventFilter(QObject *object, QEvent *event)
                 if (c_model->isGameOver()) // The game has ended, for some reason
                 {
                     e_curStat = GEND; // Go to "end" state
-
-                    /* Update view */
-                    //c_view->centralWidget->setDispScore(0); // Reset score
-                    c_view->centralWidget->setGameInProg(false); // Tell view to draw score
 
                     /* Check if the user lost or won */
                     if (c_model->isBoardEmpty()) // Board is empty, so user won

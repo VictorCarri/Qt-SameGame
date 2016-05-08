@@ -9,6 +9,8 @@
 #include <QDebug> // qDebug()
 #include <qglobal.h> // qsrand(), qrand()
 #include <QDateTime> // QDateTime class (get # of seconds since epoch for randomization)
+#include <QSaveFile> // To safely write to the save file
+#include <QTextStream> // Text stream to write to/read from file
 
 using namespace std; // To save some typing
 
@@ -63,7 +65,7 @@ Game::Game(int rows, int cols, int nColours) :
  * @brief Game::Game Constructor. Loads a game from a file.
  * @param fname The name of the file to parse.
  */
-Game::Game(string fname)
+Game::Game(QString fname)
 {
 
 }
@@ -787,4 +789,119 @@ bool Game::isCellEmpty(int m_x, int m_y)
 int Game::getPoints()
 {
     return c_points; // Return the user's score
+}
+
+/**
+ * @brief save Saves the game's data to the given file name.
+ * @param fname The name of the file to save to. It will be overwritten if it already exists. Otherwise, it will be created.
+ */
+int Game::save(QString fname)
+{
+    /* File vars */
+    QSaveFile outFile(fname); // The file object to write to. A "save file" is used to minimize the risk of corruption.
+    QTextStream outStream(&outFile); // Text stream used to write to file
+
+    /* Data vars */
+    QQueue<pair<int, int>> m_cBlocksCop; // Holds a copy of the blocks queue - used to dequeue blocks when writing to file
+    pair<int, int> coord; // Holds the coordinate from the queue of changed block locations
+
+    /* Counters */
+    int r = 0; // Row counter
+    int c = 0; // Column counter
+    int colr = 0; // Colour counter
+
+    /* See if we can open the file */
+    if (outFile.open(QIODevice::WriteOnly | QIODevice::Text)) // Opeinng the file as a text file for writing was successful
+    {
+        /*** Write data line-by-line ***/
+
+        /** Write the integer vars **/
+        outStream << m_maxRow << "," << m_maxCol << "," // Writes the # of rows & cols in the format "$cols,$rows"
+        << c_points << "," // Write the user's current score to the file
+        << m_nColours << endl; // Write the # of colours to the stream
+
+        /** Write the board to the file **/
+
+        /*
+         * ALGORITHM
+         * ---------
+         * For each row:
+         *  For each column:
+         *      Write the index at c_board[row][col] to the file
+         *
+         *      If this isn't the last column:
+         *          Write a column separator
+         *
+         *  Write a row separator # End the row
+         */
+        for (r = 0; r < m_maxRow; r++) // Loop through the rows
+        {
+            for (c = 0; c < m_maxCol; c++) // Loop through the columns
+            {
+                outStream << c_board->at(r).at(c); // Write the colour index at this location to the file
+
+                /* Write column separator if this isn't the last column */
+                if (c != m_maxCol-1) // Not the last column
+                {
+                    outStream << ","; // Write a comma as a column separator
+                }
+            }
+
+            /* Write separator if this isn't the last row */
+            if (r != m_maxRow-1) // Not the last row
+            {
+                outStream << ":"; // End the current row
+            }
+        }
+
+        outStream << endl; // End the board line
+
+        /** Write the colours to the file **/
+
+        /*
+         * Description
+         * -----------
+         * For each colour:
+         *  Write its r, g, b values in the form "$r,$g,$b". Colours will be separated by :.
+         * Eg: 12,23,23:23,234,145:...
+         */
+        for (colr = 0; colr < c_colours->size(); colr++) // Loop through the colours
+        {
+            outStream << c_colours->at(colr).red() << "," << c_colours->at(colr).green() << "," << c_colours->at(colr).blue(); // Print the colour's R, G, and B values
+
+            /* Determine whether or not to print a separator */
+            if (colr != c_colours->size()-1) // This isn't the last element
+            {
+                outStream << ":"; // Print a separator
+            }
+        }
+
+        outStream << endl; // End the colour line
+
+        /** Write the changed blocks to the file **/
+        m_cBlocksCop.swap(c_cBlocks); // Make a copy of the queue of changed blocks
+
+        while (!m_cBlocksCop.isEmpty()) // Loop until the copy of the queue is empty
+        {
+            coord = m_cBlocksCop.dequeue(); // Fetch the next coordinate from the queue
+            outStream << get<0>(coord) << "," << get<1>(coord); // Write the coordinate to the stream
+
+            /* Determine whether or not to print a separator */
+            if (m_cBlocksCop.size() > 1) // > 1 elem left, separator required
+            {
+                outStream << ":"; // Write a separator
+            }
+
+            // No separator required if only 1 elem left - and it has already been printed
+        }
+
+        outFile.commit(); // Save changes to disk
+
+        return 0;
+    }
+
+    else // Couldn't open file for some reason.
+    {
+        return 1; // Indicate error to caller
+    }
 }

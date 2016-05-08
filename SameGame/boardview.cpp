@@ -148,7 +148,7 @@ void BoardView::paintEvent(QPaintEvent * m_event)
     int cellWidth = width() / nRows; // Width of a cell is total width / # of cells
     int  cellHeight = height() / nCols; // Cell height = total height / # of rows
     QFont scoreFont("Times New Roman", 20, 5); // Bold, non-italic, size 20 Times New Roman
-    QString scoreStr = QString("Score: %1").arg(dispScore); // String to use for score. Contains token to be replaced by current score before display.
+    QString scoreStr = QString(tr("Score: %1")).arg(dispScore); // String to use for score. Contains token to be replaced by current score before display.
 
     try
     {
@@ -172,7 +172,7 @@ void BoardView::paintEvent(QPaintEvent * m_event)
             painter.setFont(scoreFont); // Use the score font
             painter.setBrush(QBrush(QColor(255, 255, 255))); // Draw in white
             painter.setPen(QPen(QColor(255, 255, 255))); // Draw text in white
-            painter.drawText((nCols-2)*cellWidth, cellHeight, scoreStr); // Draw the score string
+            painter.drawText((nCols-1)*cellWidth, cellHeight, scoreStr); // Draw the score string
         }
     }
 
