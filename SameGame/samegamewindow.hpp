@@ -52,6 +52,7 @@ class SameGameWindow : public QMainWindow
         /* File menu actions */
         void on_actionNew_Game_triggered(); // Handles a click on the File->"New Game" menu item.
         void on_actionSave_Game_triggered(); // Handles a click on the File->"Save Game" menu item
+        void on_actionLoad_Game_triggered(); // Handles a click on the File->"Load Game" menu item
 
         /* Help menu actions */
         void on_actionGame_triggered(); // Handles a click on the Help->"How to play" menu item.

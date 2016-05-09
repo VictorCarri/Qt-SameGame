@@ -1,4 +1,6 @@
-#include "game.hpp"
+/* Our includes */
+#include "game.hpp" // Class definition
+#include "savefileexception.hpp" // Save file exception class
 
 /* STL Headers */
 #include <utility> // std::pair<>
@@ -11,11 +13,14 @@
 #include <QDateTime> // QDateTime class (get # of seconds since epoch for randomization)
 #include <QSaveFile> // To safely write to the save file
 #include <QTextStream> // Text stream to write to/read from file
+#include <QStringList> // Holds split strings
 
 using namespace std; // To save some typing
 
 /* Defines */
 #define BLACK 0 // Colour black - index in colour vector
+#define ROWSEP QChar(':') // Row separator in file
+#define COLSEP QChar(',') // Column separator in file
 
 /*** Types ***/
 enum Direction
@@ -62,12 +67,191 @@ Game::Game(int rows, int cols, int nColours) :
 }
 
 /**
- * @brief Game::Game Constructor. Loads a game from a file.
+ * @brief Game::Game Constructor. Loads a game from a file, validating line-by-line.
  * @param fname The name of the file to parse.
+ * @throws SaveFileFormatException This exception is thrown if an error is encountered while parsing the file. It's
+ * what()-text will contain a message describing the error.
  */
 Game::Game(QString fname)
 {
+    /* File reading */
+    QSaveFile saveFile(fname); // Construct a safe file for reading
+    QTextStream saveFileStream(&saveFile); // Construct a stream to read from the file
 
+    /** Parsing **/
+    int lineNo = 1; // Line counter. Determines how we parse the line (tells us what data is stored on the line)
+    QString line; // Holds the current line in the file
+    QStringList split; // Holds the list of split substrings returned when the current line is split
+    bool convSucc; // Tells us whether a conversion to an integer was successful
+    QStringList split2; // Holds list of split strings
+    int r; // Row counter
+    int c; // Column counter
+    int col; // Colour counter
+    int R, G, B; // Colour component values
+
+    while (!saveFileStream.atEnd()) // Loop until the end of the file
+    {
+        saveFileStream >> line; // Read a line from the file
+
+        switch (lineNo) // Parse line differently, depending on which line we're reading
+        {
+            case 1: // Data: "$m_maxRow,$m_maxCol,$c_points,$m_nColours"
+            {
+                split = line.split(QChar(',')); // Split the line by a comma
+
+                /* Parse # of rows */
+                m_maxRow = split.at(0).toInt(&convSucc); // Try to convert string to int and store it
+
+                /* Check conversion */
+                if (convSucc) // Conversion was successful
+                {
+                    /* Parse # of cols */
+                    m_maxCol = split.at(1).toInt(&convSucc); // Try to convert string to int and store it
+
+                    /* Check conversion */
+                    if (convSucc) // Conversion was successful
+                    {
+                        /* Parse points */
+                        c_points = split.at(2).toInt(&convSucc); // Try to convert string to int and store it
+
+                        /* Check conversion */
+                        if (convSucc) // The conversion was successful
+                        {
+                            /* Parse # of colours */
+                            m_nColours = split.at(3).toInt(&convSucc); // Try to convert string to int and store it
+
+                            /* Check conversion */
+                            if (convSucc) // Conversion was successful
+                            {
+                                ++lineNo; // Parse board data on next loop
+
+                                /* Set up variables */
+                                c_board = new vector<vector<int>>(m_maxRow, vector<int>(m_maxCol, 0)); // Create the board vector and initialize it to m_maxRow rows, containing m_maxCol columns of black each
+                                c_colours = new vector<QColor>(m_nColours, QColor(0, 0, 0)); // Create the vector of colours
+                                c_colours->push_back(QColor(0, 0, 0)); // Add black to vector first
+                            }
+
+                            else // Conversion was unsuccessful
+                            {
+                                throw SaveFileException(QString("Error in parsing # of colours text (%1) as an integer.").arg(split.at(3)).toStdString().c_str());
+                            }
+                        }
+
+                        else // Conversion was unsuccessful
+                        {
+                            throw SaveFileException(QString("Error in parsing points text (%1) as an integer.").arg(split.at(2)).toStdString().c_str());
+                        }
+                    }
+
+                    else // Unsuccessful conversion
+                    {
+                        throw SaveFileException(QString("Error in parsing # of cols text (%1) as an integer.").arg(split.at(1)).toStdString().c_str());
+                    }
+                }
+
+                else // ERROR!
+                {
+                    throw SaveFileException(QString("Error in parsing # of rows text (%1) as an integer.").arg(split.at(0)).toStdString().c_str()); // Throw an exception to indicate an error
+                }
+
+                break;
+            }
+
+            case 2: // Parse board data
+            {
+                split = line.split(ROWSEP); // Rows are separated by colons
+
+                for (r = 0; r < m_maxRow; r++) // Loop through the rows
+                {
+                    split2 = split.at(r).split(COLSEP); // Split row into columns
+
+                    for (c = 0; c < m_maxCol; c++) // Loop through the columns
+                    {
+                        c_board->at(r)[c] = split2.at(c).toInt(&convSucc); // Try to convert the index to an integer
+
+                        /* Check if conversion succeeded */
+                        if (convSucc) // Conversion succeeded
+                        {
+                            if (c_board->at(r).at(c) >= 0) // Ensure that index is valid
+                            {
+                                ++lineNo; // Parse colour data on next loop
+                                continue; // Go to next iteration to parse colours
+                            }
+
+                            else // Invalid index
+                            {
+                                throw SaveFileException(QString("Invalid index parsed at coords (%1, %2)").arg(c).arg(r).toStdString().c_str());
+                            }
+                        }
+
+                        else // Conversion failed
+                        {
+                            throw SaveFileException(QString("Error in parsing row/column index (%1) as an integer.").arg(split2.at(c)).toStdString().c_str());
+                        }
+                    }
+                }
+
+                break;
+            }
+
+            case 3: // Parse colour data
+            {
+                split = line.split(":"); // Split line into rows (indexes in array)
+
+                for (col = 0; col < m_maxRow; col++) // Loop through the colours
+                {
+                    split2 = split.at(col).split(","); // Split colour data into R, G and B values
+
+                    /* Convert and validate red component */
+                    R = split2.at(0).toInt(&convSucc); // Try to convert red component to an integer
+
+                    if (convSucc) // Conversion was successful
+                    {
+                        /* Convert and validate green component */
+                        G = split2.at(1).toInt(&convSucc); // Try to convert green component to an integer
+
+                        if (convSucc) // Conversion was successful
+                        {
+                            /* Convert and validate blue component */
+                            B = split2.at(2).toInt(&convSucc); // Try to convert blue comp to int
+
+                            if (convSucc) // Successful conversion
+                            {
+                                c_colours->push_back(QColor(R, G, B)); // Add the colour to the vector
+                            }
+
+                            else // Error in converting comp
+                            {
+                                throw SaveFileException(QString("Error in parsing blue component %1 of colour %2").arg(split2.at(2)).arg(split.join(QChar(','))).toStdString().c_str());
+                            }
+                        }
+
+                        else // Conversion of green component was unsuccessful
+                        {
+                            throw SaveFileException(QString("Error in parsing green component %1 of colour %2").arg(split2.at(1)).arg(split.join(QChar(','))).toStdString().c_str());
+                        }
+                    }
+
+                    else // Conversion of red comp was unsuccessful
+                    {
+                        throw SaveFileException(QString("Error in converting red component %1 of colour %2 to an integer.").arg(split2.at(0)).arg(split.join(QChar(','))).toStdString().c_str());
+                    }
+                }
+
+                ++lineNo; // Parse queue of changed blocks on next loop
+                break;
+            }
+        }
+    }
+
+    /* Queue changed blocks (all of board) for view to fetch */
+    for (r = 0; r < m_maxRow; r++) // Loop through the rows
+    {
+        for (c = 0; c < m_maxCol; c++) // Loop through the columns
+        {
+            c_cBlocks.enqueue(pair<int, int>(r, c)); // Enqueue this coord
+        }
+    }
 }
 
 /**
@@ -843,14 +1027,14 @@ int Game::save(QString fname)
                 /* Write column separator if this isn't the last column */
                 if (c != m_maxCol-1) // Not the last column
                 {
-                    outStream << ","; // Write a comma as a column separator
+                    outStream << COLSEP; // Write a column separator
                 }
             }
 
             /* Write separator if this isn't the last row */
             if (r != m_maxRow-1) // Not the last row
             {
-                outStream << ":"; // End the current row
+                outStream << ROWSEP; // End the current row
             }
         }
 
@@ -872,14 +1056,14 @@ int Game::save(QString fname)
             /* Determine whether or not to print a separator */
             if (colr != c_colours->size()-1) // This isn't the last element
             {
-                outStream << ":"; // Print a separator
+                outStream << ROWSEP; // Print a separator
             }
         }
 
         outStream << endl; // End the colour line
 
         /** Write the changed blocks to the file **/
-        m_cBlocksCop.swap(c_cBlocks); // Make a copy of the queue of changed blocks
+        /*m_cBlocksCop.swap(c_cBlocks); // Make a copy of the queue of changed blocks
 
         while (!m_cBlocksCop.isEmpty()) // Loop until the copy of the queue is empty
         {
@@ -887,13 +1071,13 @@ int Game::save(QString fname)
             outStream << get<0>(coord) << "," << get<1>(coord); // Write the coordinate to the stream
 
             /* Determine whether or not to print a separator */
-            if (m_cBlocksCop.size() > 1) // > 1 elem left, separator required
+        /*    if (m_cBlocksCop.size() > 1) // > 1 elem left, separator required
             {
-                outStream << ":"; // Write a separator
+                outStream << ROWSEP; // Write a separator
             }
 
             // No separator required if only 1 elem left - and it has already been printed
-        }
+        }*/
 
         outFile.commit(); // Save changes to disk
 

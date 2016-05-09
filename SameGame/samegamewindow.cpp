@@ -3,6 +3,7 @@
 
 /* Our includes */
 #include "boardview.hpp" // Board widget
+#include "savefileexception.hpp" // SaveFileFormatException - thrown by Game constructor when save file format is invalid
 
 /* Qt includes */
 #include <QMessageBox> // Message box
@@ -10,6 +11,7 @@
 #include <QMouseEvent> // For mouse events
 #include <QFileDialog> // To show the file-selection dialogs
 #include <QStandardPaths> // To get the user's home directory
+#include <QFile> // File-checking
 
 /* STL includes */
 #include <utility> // pair
@@ -70,25 +72,29 @@ void SameGameWindow::on_actionSave_Game_triggered()
     {
         sFPath = QFileDialog::getSaveFileName(this, tr("Save Game"), QStandardPaths::writableLocation(QStandardPaths::HomeLocation), tr("SameGame save files (*.sgsv)")); // Show a save dialog and get a file name from the user
 
-        /* DEBUGGING */
-        mb.setText(QString("You chose to save to: %1").arg(sFPath)); // DEBUGGING: Set the message to show the path chosen by the user
-        mb.exec();
-
-        mRet = c_model->save(sFPath); // Get the model to save the data to this file
-
-        /* Check for errors */
-        if (mRet == 0) // No errors
+        /* Ensure that user selected a path */
+        if (!sFPath.isNull()) // User selected a path
         {
-            /* Let user know that their game was successfully saved */
-            mb.setText(QString("Successfully saved game to: %1").arg(sFPath));
+            /* DEBUGGING */
+            mb.setText(QString("You chose to save to: %1").arg(sFPath)); // DEBUGGING: Set the message to show the path chosen by the user
             mb.exec();
-        }
 
-        else // Error
-        {
-            /* DEBUGGING: Let user know of error */
-            mb.setText(QString("Error in saving game: %1").arg(mRet)); // Setup error text
-            mb.exec(); // Show the message
+            mRet = c_model->save(sFPath); // Get the model to save the data to this file
+
+            /* Check for errors */
+            if (mRet == 0) // No errors
+            {
+                /* Let user know that their game was successfully saved */
+                mb.setText(QString("Successfully saved game to: %1").arg(sFPath));
+                mb.exec();
+            }
+
+            else // Error
+            {
+                /* DEBUGGING: Let user know of error */
+                mb.setText(QString("Error in saving game: %1").arg(mRet)); // Setup error text
+                mb.exec(); // Show the message
+            }
         }
     }
 
@@ -136,6 +142,50 @@ void SameGameWindow::on_actionNew_Game_triggered()
         e_curStat = IGAM; // Change to "in game" state
     }
 }
+
+/**
+ * @brief SameGameWindow::on_actionLoad_Game_triggered Handles a click on the "Load Game" menu item.
+ */
+void SameGameWindow::on_actionLoad_Game_triggered()
+{
+    QString lfPath; // Path to file to load - selected by user
+    QMessageBox uMsg; // Used to display messages to the user
+
+    lfPath = QFileDialog::getOpenFileName(this, tr("Load Game"), tr(QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).at(0).toStdString().c_str()), tr("SameGame save files (*.sgsv)")); // Get the path of the file which the user wants to load. Use the first directory in the list od desktop dirs.
+
+    /* Check if user canceled */
+    if (!lfPath.isNull()) // User chose a path
+    {
+        /* Check if the path exists */
+        if (QFile::exists(lfPath)) // The file exists
+        {
+            try
+            {
+               c_model = new Game(lfPath); // Try to create a new game by loading data from the file
+               updateView(); // Draw the loaded game
+               e_curStat = IGAM; // Go to the "in game" state
+            }
+
+            catch (SaveFileException& sfe) // Handle the custom exception thrown by Game's file-path constructor if the file format is invalid
+            {
+                /* Cleanup */
+                c_model = 0; // Set pointer to NULL (construction of a Game failed, so there's no need to delete it)
+
+                /* Alert user */
+                uMsg.setText(sfe.what()); // Show the user the error text
+                uMsg.setWindowTitle(QString("Error while attempting to load save file %1").arg(lfPath)); // Tell user an error occurred while attempting to load the file
+                uMsg.exec(); // Display the message
+            }
+        }
+
+        else // Error 1
+        {
+            uMsg.setText("You must choose an existing file!"); // Set the message to display
+            uMsg.exec(); // Display the message box
+        }
+    }
+}
+
 
 /*** About menu actions ***/
 
