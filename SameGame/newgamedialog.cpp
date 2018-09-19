@@ -32,7 +32,7 @@ void NewGameDialog::on_buttonBox_accepted()
  */
 void NewGameDialog::on_buttonBox_rejected()
 {
-    wasAccepted = false; // User chose to start a new game
+    wasAccepted = false; // User chose not to start a new game
 }
 
 /*** Getters ***/
